@@ -16,7 +16,7 @@ const planSchema = new mongoose.Schema({
   },
   days: [
     {
-      dayNumber: { type: String, required: true },
+      dayNumber: { type: Number, required: true },
       reading: { type: String, required: true },
       book: { type: String, required: true },
     },
