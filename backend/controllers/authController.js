@@ -1,3 +1,5 @@
+const sign
+
 exports.signUp = async (req, res, next) => {
   const { name, email, password, passwordConfirm } = req.body;
 
@@ -9,22 +11,26 @@ exports.signUp = async (req, res, next) => {
     });
   }
 
-  const user = await User.create({
-    name,
-    email,
-    password,
-    passwordConfirm,
-  });
+  try {
+    const user = await User.create({
+      name,
+      email,
+      password,
+      passwordConfirm,
+    });
 
-  const token = user.createToken();
+    const token = user.createToken();
 
-  res.status(201).json({
-    status: "success",
-    token,
-    data: {
-      user,
-    },
-  });
+    res.status(201).json({
+      status: "success",
+      token,
+      data: {
+        user,
+      },
+    });
+  } catch (err) {
+    console.log(err.message);
+  }
 };
 
-exports.login = async (req, res, next) => {};
+// exports.login = async (req, res, next) => {};
