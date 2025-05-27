@@ -1,4 +1,5 @@
 const mongoose = require("mongoose");
+const bcrypt = require("bcrypt");
 
 const userSchema = new mongoose.Schema({
   name: {
@@ -10,9 +11,19 @@ const userSchema = new mongoose.Schema({
     required: [true, "Please provide your email!"],
     unique: true,
   },
+  role: {
+    type: String,
+    enum: ["user", "admin"],
+    default: "user",
+  },
+  phoneNumber: {
+    type: String,
+    required: [true, "Please provide your phone number!"],
+  },
   password: {
     type: String,
     required: [true, "Please provide a password!"],
+    minlength: [8, "Password must be at least 8 characters long!"],
     select: false,
   },
   passwordConfirm: {
@@ -26,7 +37,14 @@ const userSchema = new mongoose.Schema({
       message: "Passwords are not the same!",
     },
   },
+  passwordChangedAt: Date,
 });
 
+userSchema.pre("save", function (next) {
+  if (!this.isModified("password")) return next();
+  this.password = bcrypt.hashSync(this.password, 12);
+  this.passwordConfirm = undefined;
+  next();
+});
 const User = mongoose.model("User", userSchema);
 module.exports = User;

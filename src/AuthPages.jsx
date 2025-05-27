@@ -1,13 +1,32 @@
 import React from "react";
 import { Link } from "react-router-dom";
+import { useState } from "react";
+import axios from "axios";
 
-export const AuthForm = ({
-  title,
-  actionLabel,
-  onSubmit,
-  footerLink,
-  footerText,
-}) => {
+export const AuthForm = ({ title, actionLabel, footerLink, footerText }) => {
+  const [name, setName] = useState("");
+  const [phoneNumber, setPhoneNumber] = useState("");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [passwordConfirm, setPasswordConfirm] = useState("");
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+
+    const data = { name, phoneNumber, email, password, passwordConfirm };
+
+    try {
+      const res = await axios.post(
+        `http://localhost:5000/api/users/auth/${
+          actionLabel == "Sign Up" ? "signup" : "login"
+        }`,
+        data
+      );
+      console.log(res);
+    } catch (err) {
+      console.log(err);
+    }
+  };
   return (
     <div className="min-h-screen bg-white text-gray-800 flex items-center justify-center px-4">
       <h2
@@ -21,13 +40,36 @@ export const AuthForm = ({
           {title}
         </h2>
 
-        <form onSubmit={onSubmit} className="space-y-4">
+        <form onSubmit={handleSubmit} className="space-y-4">
+          {actionLabel == "Sign Up" && (
+            <>
+              <div>
+                <label className="block mb-1 font-medium">Full Name</label>
+                <input
+                  type="text"
+                  required
+                  className="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring focus:border-blue-500"
+                  onChange={(e) => setName(e.target.value)}
+                />
+              </div>
+              <div>
+                <label className="block mb-1 font-medium">Phone Number</label>
+                <input
+                  type="phone"
+                  required
+                  className="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring focus:border-blue-500"
+                  onChange={(e) => setPhoneNumber(e.target.value)}
+                />
+              </div>
+            </>
+          )}
           <div>
             <label className="block mb-1 font-medium">Email</label>
             <input
               type="email"
               required
               className="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring focus:border-blue-500"
+              onChange={(e) => setEmail(e.target.value)}
             />
           </div>
 
@@ -37,6 +79,17 @@ export const AuthForm = ({
               type="password"
               required
               className="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring focus:border-blue-500"
+              onChange={(e) => setPassword(e.target.value)}
+            />
+          </div>
+
+          <div>
+            <label className="block mb-1 font-medium">Password Confirm</label>
+            <input
+              type="password"
+              required
+              className="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring focus:border-blue-500"
+              onChange={(e) => setPasswordConfirm(e.target.value)}
             />
           </div>
 
@@ -67,24 +120,20 @@ export const AuthForm = ({
 };
 
 export const SignUp = () => (
-  <AuthForm
-    title="Create Your Account"
-    actionLabel="Sign Up"
-    onSubmit={(e) => {
-      e.preventDefault(); /* handle signup */
-    }}
-    footerLink="/login"
-    footerText="Already have an account?"
-  />
+  <>
+    <AuthForm
+      title="Create Your Account"
+      actionLabel="Sign Up"
+      footerLink="/login"
+      footerText="Already have an account?"
+    />
+  </>
 );
 
 export const SignIn = () => (
   <AuthForm
     title="Welcome Back"
     actionLabel="Sign In"
-    onSubmit={(e) => {
-      e.preventDefault(); /* handle login */
-    }}
     footerLink="/signup"
     footerText="Don't have an account?"
   />
