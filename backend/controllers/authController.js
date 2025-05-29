@@ -36,5 +36,13 @@ exports.signUp = catchAsync(async (req, res, next) => {
 });
 
 exports.login = (req, res) => {
+  const { email, password } = req.body;
+
+  if (!email || !password) {
+    return res.status(401).json({
+      status: "fail",
+      message: "proide email and password",
+    });
+  }
   res.status(200).json({ status: "success", message: "Login route works!" });
 };
