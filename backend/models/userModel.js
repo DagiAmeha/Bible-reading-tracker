@@ -40,6 +40,9 @@ const userSchema = new mongoose.Schema({
   passwordChangedAt: Date,
 });
 
+userSchema.methods.correctPassword = async function (inputPass) {
+  return await bcrypt.compare(inputPass, this.password);
+};
 userSchema.pre("save", function (next) {
   if (!this.isModified("password")) return next();
   this.password = bcrypt.hashSync(this.password, 12);

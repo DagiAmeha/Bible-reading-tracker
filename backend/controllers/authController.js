@@ -44,5 +44,19 @@ exports.login = (req, res) => {
       message: "proide email and password",
     });
   }
-  res.status(200).json({ status: "success", message: "Login route works!" });
+  const user = await User.findOne({email}).select("+password");
+
+  if(user && !(await user.comparePassword(user.password))){
+    return res.status(401).json({
+      status: 'fail',
+      message: "invalid email or password!"
+    })
+  }
+  const token = signToken(user.id)
+  res.status(200).json({ status: "success",
+    token,
+    data: {
+      user
+    }
+   });
 };
