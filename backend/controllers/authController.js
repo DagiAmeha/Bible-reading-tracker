@@ -35,7 +35,7 @@ exports.signUp = catchAsync(async (req, res, next) => {
   });
 });
 
-exports.login = (req, res) => {
+exports.login = catchAsync(async (req, res) => {
   const { email, password } = req.body;
 
   if (!email || !password) {
@@ -44,19 +44,22 @@ exports.login = (req, res) => {
       message: "proide email and password",
     });
   }
-  const user = await User.findOne({email}).select("+password");
+  const user = await User.findOne({ email }).select("+password");
 
-  if(user && !(await user.comparePassword(user.password))){
+  console.log(user);
+  if (!user && !(await user.correctPassword(password))) {
     return res.status(401).json({
-      status: 'fail',
-      message: "invalid email or password!"
-    })
+      status: "fail",
+      message: "invalid email or password!",
+    });
   }
-  const token = signToken(user.id)
-  res.status(200).json({ status: "success",
+
+  const token = signToken(user.id);
+  res.status(200).json({
+    status: "success",
     token,
     data: {
-      user
-    }
-   });
-};
+      user,
+    },
+  });
+});

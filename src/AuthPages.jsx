@@ -47,8 +47,10 @@ export const AuthForm = ({ title, actionLabel, footerLink, footerText }) => {
                 <label className="block mb-1 font-medium">Full Name</label>
                 <input
                   type="text"
+                  name="name"
                   required
                   className="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring focus:border-blue-500"
+                  value={name}
                   onChange={(e) => setName(e.target.value)}
                 />
               </div>
@@ -56,8 +58,10 @@ export const AuthForm = ({ title, actionLabel, footerLink, footerText }) => {
                 <label className="block mb-1 font-medium">Phone Number</label>
                 <input
                   type="phone"
+                  name="phoneNumber"
                   required
                   className="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring focus:border-blue-500"
+                  value={phoneNumber}
                   onChange={(e) => setPhoneNumber(e.target.value)}
                 />
               </div>
@@ -67,8 +71,10 @@ export const AuthForm = ({ title, actionLabel, footerLink, footerText }) => {
             <label className="block mb-1 font-medium">Email</label>
             <input
               type="email"
+              name="email"
               required
               className="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring focus:border-blue-500"
+              value={email}
               onChange={(e) => setEmail(e.target.value)}
             />
           </div>
@@ -77,25 +83,35 @@ export const AuthForm = ({ title, actionLabel, footerLink, footerText }) => {
             <label className="block mb-1 font-medium">Password</label>
             <input
               type="password"
+              name="password"
               required
               className="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring focus:border-blue-500"
+              value={password}
               onChange={(e) => setPassword(e.target.value)}
             />
           </div>
 
-          <div>
-            <label className="block mb-1 font-medium">Password Confirm</label>
-            <input
-              type="password"
-              required
-              className="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring focus:border-blue-500"
-              onChange={(e) => setPasswordConfirm(e.target.value)}
-            />
-          </div>
+          {actionLabel == "Sign Up" && (
+            <>
+              <div>
+                <label className="block mb-1 font-medium">
+                  Password Confirm
+                </label>
+                <input
+                  type="password"
+                  name="passwordConfirm"
+                  required
+                  className="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring focus:border-blue-500"
+                  value={passwordConfirm}
+                  onChange={(e) => setPasswordConfirm(e.target.value)}
+                />
+              </div>
+            </>
+          )}
 
           <button
             type="submit"
-            className="w-full bg-blue-600 text-white py-2 rounded hover:bg-blue-700 transition"
+            className="w-full bg-blue-600 text-white py-2 rounded hover:bg-blue-700 hover:cursor-pointer transition"
           >
             {actionLabel}
           </button>
