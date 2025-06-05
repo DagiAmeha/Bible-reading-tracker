@@ -1,14 +1,59 @@
 import React from "react";
+import { EyeIcon, EyeSlashIcon } from "@heroicons/react/24/outline";
 import { Link } from "react-router-dom";
 import { useState } from "react";
 import axios from "axios";
+import { useEffect } from "react";
 
+const PasswordInput = ({ name }) => {
+  const [password, setPassword] = useState("");
+  const [passwordConfirm, setPasswordConfirm] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
+
+  return (
+    <div>
+      <label className="block mb-1 font-bold">{name}</label>
+      <div className="relative font-light">
+        <input
+          type={showPassword ? "text" : "password"}
+          name="password"
+          required
+          className="w-full border border-gray-300 rounded px-3 py-2 font-light  focus:outline-none focus:ring focus:border-blue-500"
+          placeholder={name}
+          value={name == "Password" ? password : passwordConfirm}
+          onChange={(e) => {
+            name == "Password"
+              ? setPassword(e.target.value)
+              : setPasswordConfirm(e.target.value);
+          }}
+        />
+
+        <button
+          type="button"
+          className="absolute right-4 top-2 cursor-pointer"
+          onClick={() => setShowPassword(!showPassword)}
+        >
+          {showPassword ? (
+            <EyeSlashIcon className="w-5 h-5" />
+          ) : (
+            <EyeIcon className="w-5 h-5" />
+          )}
+        </button>
+      </div>
+    </div>
+  );
+};
 export const AuthForm = ({ title, actionLabel, footerLink, footerText }) => {
   const [name, setName] = useState("");
   const [phoneNumber, setPhoneNumber] = useState("");
   const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [passwordConfirm, setPasswordConfirm] = useState("");
+
+  const [show, setShow] = useState(false);
+
+  useEffect(() => {
+    // Trigger animation after mount
+    setTimeout(() => setShow(true), 100); // short delay to allow animation
+  }, []);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -28,13 +73,10 @@ export const AuthForm = ({ title, actionLabel, footerLink, footerText }) => {
     }
   };
   return (
-    <div className="min-h-screen bg-white text-gray-800 flex items-center justify-center px-4">
-      <h2
-        className="absolute top-4 left-10
-      text-2xl font-bold text-center mb-6 text-blue-700"
-      >
-        <a href="/">&larr; Bible Study</a>
-      </h2>
+    <div
+      className={`min-h-screen bg-white text-gray-800 flex items-start mt-4 shadow-md justify-center px-4 transition-all duration-700 ease-out
+        ${show ? "opacity-100 translate-y-0" : "opacity-0 -translate-y-5"}`}
+    >
       <div className="max-w-md w-full bg-gray-50 p-8 rounded-lg shadow-md">
         <h2 className="text-2xl font-bold text-center mb-6 text-blue-700">
           {title}
@@ -44,84 +86,58 @@ export const AuthForm = ({ title, actionLabel, footerLink, footerText }) => {
           {actionLabel == "Sign Up" && (
             <>
               <div>
-                <label className="block mb-1 font-medium">Full Name</label>
+                <label className="block mb-1 font-bold">Full Name</label>
                 <input
                   type="text"
                   name="name"
                   required
+                  placeholder="e.g Abebe Tesfaye"
                   className="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring focus:border-blue-500"
                   value={name}
                   onChange={(e) => setName(e.target.value)}
                 />
               </div>
               <div>
-                <label className="block mb-1 font-medium">Phone Number</label>
-                <input
-                  type="phone"
-                  name="phoneNumber"
-                  required
-                  className="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring focus:border-blue-500"
-                  value={phoneNumber}
-                  onChange={(e) => setPhoneNumber(e.target.value)}
-                />
+                <label className="block mb-1 font-bold">Phone Number</label>
+                <div className="relative">
+                  <input
+                    type="tel"
+                    name="phoneNumber"
+                    pattern="[0-9]+"
+                    placeholder="e.g 912345678"
+                    required
+                    className="w-full border border-gray-300 rounded pl-12 pr-3 py-2 focus:outline-none focus:ring focus:border-blue-500"
+                    value={phoneNumber}
+                    onChange={(e) => setPhoneNumber(e.target.value)}
+                  />
+                  <p className="absolute top-2 left-2">+251 </p>
+                </div>
               </div>
             </>
           )}
           <div>
-            <label className="block mb-1 font-medium">Email</label>
+            <label className="block mb-1 font-bold">Email</label>
             <input
               type="email"
               name="email"
               required
+              placeholder="e.g example@gmail.com"
               className="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring focus:border-blue-500"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
             />
           </div>
-
-          <div>
-            <label className="block mb-1 font-medium">Password</label>
-            <input
-              type="password"
-              name="password"
-              required
-              className="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring focus:border-blue-500"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-            />
-          </div>
-
+          <PasswordInput name="Password" />
           {actionLabel == "Sign Up" && (
-            <>
-              <div>
-                <label className="block mb-1 font-medium">
-                  Password Confirm
-                </label>
-                <input
-                  type="password"
-                  name="passwordConfirm"
-                  required
-                  className="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring focus:border-blue-500"
-                  value={passwordConfirm}
-                  onChange={(e) => setPasswordConfirm(e.target.value)}
-                />
-              </div>
-            </>
+            <PasswordInput name="Password Confirm" />
           )}
 
           <button
             type="submit"
-            className="w-full bg-blue-600 text-white py-2 rounded hover:bg-blue-700 hover:cursor-pointer transition"
+            className="w-full bg-blue-600 text-white py-2 rounded mt-2 hover:bg-blue-700 hover:cursor-pointer transition"
           >
             {actionLabel}
           </button>
-
-          <div className="text-center mt-4">
-            <p className="text-sm text-gray-600">or continue with</p>
-            <button className="mt-2 w-full border border-gray-300 text-gray-700 py-2 rounded hover:bg-gray-100">
-              Continue with Google
-            </button>
-          </div>
         </form>
 
         <p className="text-center text-sm text-gray-600 mt-6">
