@@ -5,9 +5,7 @@ import { useState } from "react";
 import axios from "axios";
 import { useEffect } from "react";
 
-const PasswordInput = ({ name }) => {
-  const [password, setPassword] = useState("");
-  const [passwordConfirm, setPasswordConfirm] = useState("");
+const PasswordInput = ({ name, password, passwordConfirm }) => {
   const [showPassword, setShowPassword] = useState(false);
 
   return (
@@ -43,11 +41,19 @@ const PasswordInput = ({ name }) => {
     </div>
   );
 };
-export const AuthForm = ({ title, actionLabel, footerLink, footerText }) => {
+export const AuthForm = ({
+  title,
+  actionLabel,
+  footerLink,
+  footerText,
+  user,
+  setUser,
+}) => {
   const [name, setName] = useState("");
   const [phoneNumber, setPhoneNumber] = useState("");
   const [email, setEmail] = useState("");
-
+  const [password, setPassword] = useState("");
+  const [passwordConfirm, setPasswordConfirm] = useState("");
   const [show, setShow] = useState(false);
 
   useEffect(() => {
@@ -67,6 +73,14 @@ export const AuthForm = ({ title, actionLabel, footerLink, footerText }) => {
         }`,
         data
       );
+
+      if (res.data.success) {
+        setUser(res.data.user);
+        localStorage.setItem("user", JSON.stringify(res.data.user));
+        window.location.href = "/dashboard"; // Redirect to dashboard
+      } else {
+        alert(res.data.message || "An error occurred");
+      }
       console.log(res);
     } catch (err) {
       console.log(err);
@@ -151,23 +165,27 @@ export const AuthForm = ({ title, actionLabel, footerLink, footerText }) => {
   );
 };
 
-export const SignUp = () => (
+export const SignUp = ({ user, setUser }) => (
   <>
     <AuthForm
       title="Create Your Account"
       actionLabel="Sign Up"
       footerLink="/login"
       footerText="Already have an account?"
+      user={user}
+      setUser={setUser}
     />
   </>
 );
 
-export const SignIn = () => (
+export const SignIn = ({ user, setUser }) => (
   <AuthForm
     title="Welcome Back"
     actionLabel="Sign In"
     footerLink="/signup"
     footerText="Don't have an account?"
+    user={user}
+    setUser={setUser}
   />
 );
 
