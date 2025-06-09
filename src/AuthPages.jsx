@@ -5,7 +5,13 @@ import { useState } from "react";
 import axios from "axios";
 import { useEffect } from "react";
 
-const PasswordInput = ({ name, password, passwordConfirm }) => {
+const PasswordInput = ({
+  name,
+  password,
+  setPassword,
+  passwordConfirm,
+  setPasswordConfirm,
+}) => {
   const [showPassword, setShowPassword] = useState(false);
 
   return (
@@ -46,7 +52,6 @@ export const AuthForm = ({
   actionLabel,
   footerLink,
   footerText,
-  user,
   setUser,
 }) => {
   const [name, setName] = useState("");
@@ -141,9 +146,21 @@ export const AuthForm = ({
               onChange={(e) => setEmail(e.target.value)}
             />
           </div>
-          <PasswordInput name="Password" />
+          <PasswordInput
+            name="Password"
+            password={setPassword}
+            setPassword={setPassword}
+            passwordConfirm={passwordConfirm}
+            setPasswordConfirm={setPasswordConfirm}
+          />
           {actionLabel == "Sign Up" && (
-            <PasswordInput name="Password Confirm" />
+            <PasswordInput
+              name="Password Confirm"
+              password={setPassword}
+              setPassword={setPassword}
+              passwordConfirm={passwordConfirm}
+              setPasswordConfirm={setPasswordConfirm}
+            />
           )}
 
           <button
@@ -172,7 +189,6 @@ export const SignUp = ({ user, setUser }) => (
       actionLabel="Sign Up"
       footerLink="/login"
       footerText="Already have an account?"
-      user={user}
       setUser={setUser}
     />
   </>
