@@ -6,7 +6,31 @@ const signToken = (userId) => {
   return jwt.sign({ id: userId }, process.env.JWT_SECRET);
 };
 
-exports.signUp = catchAsync(async (req, res, next) => {
+const createSendToken = (user, statusCode, res) => {
+  const token = signToken(user._id);
+
+  const cookieOptions = {
+    expires: new Date(
+      Date.now() + process.env.JWT_COOKIE_EXPIRES_IN * 24 * 60 * 60 * 1000
+    ),
+    httpOnly: true,
+  };
+
+  if (process.env.NODE_ENV === "production") {
+    cookieOptions.secure = true;
+  }
+  res.cookie("jwt", token, cookieOptions);
+
+  user.password = undefined;
+  res.status(statusCode).json({
+    status: "success",
+    token,
+    data: {
+      user,
+    },
+  });
+};
+exports.signUp = async (req, res, next) => {
   const { name, email, phoneNumber, password, passwordConfirm } = req.body;
 
   if ((!name || !email || !password, !phoneNumber || !passwordConfirm)) {
@@ -16,50 +40,52 @@ exports.signUp = catchAsync(async (req, res, next) => {
     });
   }
 
-  const user = await User.create({
-    name,
-    email,
-    phoneNumber,
-    password,
-    passwordConfirm,
-  });
+  try {
+    const user = await User.create({
+      name,
+      email,
+      phoneNumber,
+      password,
+      passwordConfirm,
+    });
 
-  const token = signToken(user.id);
+    createSendToken(user, 201, res);
+  } catch (error) {
+    console.error("Error during user creation:", error);
+    return res.status(500).json({
+      status: "error",
+      message: "An error occurred while creating the user",
+    });
+  }
+};
 
-  res.status(201).json({
-    status: "success",
-    token,
-    data: {
-      user,
-    },
-  });
-});
-
-exports.login = catchAsync(async (req, res) => {
+exports.login = async (req, res) => {
   const { email, password } = req.body;
 
   if (!email || !password) {
     return res.status(401).json({
       status: "fail",
-      message: "proide email and password",
-    });
-  }
-  const user = await User.findOne({ email }).select("+password");
-
-  console.log(user);
-  if (!user && !(await user.correctPassword(password))) {
-    return res.status(401).json({
-      status: "fail",
-      message: "invalid email or password!",
+      message: "provide email and password",
     });
   }
 
-  const token = signToken(user.id);
-  res.status(200).json({
-    status: "success",
-    token,
-    data: {
-      user,
-    },
-  });
-});
+  try {
+    const user = await User.findOne({ email }).select("+password");
+
+    console.log(user);
+    if (!user || !(await user.correctPassword(password))) {
+      return res.status(401).json({
+        status: "fail",
+        message: "invalid email or password!",
+      });
+    }
+
+    createSendToken(user, 200, res);
+  } catch (error) {
+    console.error("Error during user login:", error);
+    return res.status(500).json({
+      status: "error",
+      message: "An error occurred while logging in",
+    });
+  }
+};

@@ -1,6 +1,6 @@
 import React from "react";
 import { EyeIcon, EyeSlashIcon } from "@heroicons/react/24/outline";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { useState } from "react";
 import axios from "axios";
 import { useEffect } from "react";
@@ -11,6 +11,7 @@ const PasswordInput = ({
   setPassword,
   passwordConfirm,
   setPasswordConfirm,
+  error,
 }) => {
   const [showPassword, setShowPassword] = useState(false);
 
@@ -24,18 +25,21 @@ const PasswordInput = ({
           required
           className="w-full border border-gray-300 rounded px-3 py-2 font-light  focus:outline-none focus:ring focus:border-blue-500"
           placeholder={name}
+          min={8}
           value={name == "Password" ? password : passwordConfirm}
           onChange={(e) => {
             name == "Password"
               ? setPassword(e.target.value)
               : setPasswordConfirm(e.target.value);
           }}
-        />
-
+        />{" "}
+        <br />
+        {error && <p className="text-red-500 text-sm mt-1">{error}</p>}
         <button
           type="button"
           className="absolute right-4 top-2 cursor-pointer"
           onClick={() => setShowPassword(!showPassword)}
+          tabIndex={-1}
         >
           {showPassword ? (
             <EyeSlashIcon className="w-5 h-5" />
@@ -60,17 +64,27 @@ export const AuthForm = ({
   const [password, setPassword] = useState("");
   const [passwordConfirm, setPasswordConfirm] = useState("");
   const [show, setShow] = useState(false);
+  const [error, setError] = useState("");
 
+  const navigate = useNavigate();
   useEffect(() => {
-    // Trigger animation after mount
-    setTimeout(() => setShow(true), 100); // short delay to allow animation
+    setShow(true);
   }, []);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-
+    setError("");
     const data = { name, phoneNumber, email, password, passwordConfirm };
-
+    if (actionLabel == "Sign Up") {
+      if (password !== passwordConfirm) {
+        setError("Password and Password Confirm do not match");
+        return;
+      }
+      if (password.length < 8) {
+        setError("Password must be at least 8 characters.");
+        return;
+      }
+    }
     try {
       const res = await axios.post(
         `http://localhost:5000/api/users/auth/${
@@ -78,15 +92,11 @@ export const AuthForm = ({
         }`,
         data
       );
-
-      if (res.data.success) {
-        setUser(res.data.user);
-        localStorage.setItem("user", JSON.stringify(res.data.user));
-        window.location.href = "/dashboard"; // Redirect to dashboard
-      } else {
-        alert(res.data.message || "An error occurred");
-      }
       console.log(res);
+      if (res.data.status === "success") {
+        setUser(res.data.data.user);
+        navigate("/dashboard", { replace: true });
+      }
     } catch (err) {
       console.log(err);
     }
@@ -148,18 +158,15 @@ export const AuthForm = ({
           </div>
           <PasswordInput
             name="Password"
-            password={setPassword}
+            password={password}
             setPassword={setPassword}
-            passwordConfirm={passwordConfirm}
-            setPasswordConfirm={setPasswordConfirm}
           />
           {actionLabel == "Sign Up" && (
             <PasswordInput
               name="Password Confirm"
-              password={setPassword}
-              setPassword={setPassword}
               passwordConfirm={passwordConfirm}
               setPasswordConfirm={setPasswordConfirm}
+              error={error}
             />
           )}
 
@@ -182,7 +189,7 @@ export const AuthForm = ({
   );
 };
 
-export const SignUp = ({ user, setUser }) => (
+export const SignUp = ({ setUser }) => (
   <>
     <AuthForm
       title="Create Your Account"
@@ -194,13 +201,12 @@ export const SignUp = ({ user, setUser }) => (
   </>
 );
 
-export const SignIn = ({ user, setUser }) => (
+export const SignIn = ({ setUser }) => (
   <AuthForm
     title="Welcome Back"
     actionLabel="Sign In"
     footerLink="/signup"
     footerText="Don't have an account?"
-    user={user}
     setUser={setUser}
   />
 );
