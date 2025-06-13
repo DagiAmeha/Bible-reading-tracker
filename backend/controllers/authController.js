@@ -3,6 +3,8 @@ const catchAsync = require("../utils/catchAsync");
 const User = require("../models/userModel");
 
 const signToken = (userId) => {
+  console.log("###############################3", process.env.JWT_SECRET);
+
   return jwt.sign({ id: userId }, process.env.JWT_SECRET);
 };
 
@@ -87,5 +89,55 @@ exports.login = async (req, res) => {
       status: "error",
       message: "An error occurred while logging in",
     });
+  }
+};
+
+exports.protect = async (req, res, next) => {
+  let token;
+  console.log(req.cookies);
+  if (
+    req.headers.authorization &&
+    req.headers.authorization.startsWith("Bearer")
+  ) {
+    token = req.headers.authorization.split(" ")[1];
+  } else if (req.cookies.jwt) {
+    token = req.cookies.jwt;
+  }
+  console.log(token);
+  if (!token) {
+    return res.status(401).json({
+      status: "fail",
+      message: "You are not logged in! Please log in to get access",
+    });
+  }
+  console.log("###############################3", process.env.JWT_SECRET);
+  try {
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    console.log(decoded);
+    const currentUser = await User.findById(decoded.id);
+    if (!currentUser) {
+      return res.status(401).json({
+        status: "fail",
+        message: "The user belonging to this token does no longer exist",
+      });
+    }
+
+    if (currentUser.changesPasswordAfter(decoded.iat)) {
+      return res.status(401).json({
+        status: "fail",
+        message: "User recently changed password! Please log in again",
+      });
+    }
+
+    req.user = currentUser;
+    next();
+  } catch (err) {
+    console.error("Error during token verification:", err);
+    if (err.name === "TokenExpiredError") {
+      return res.status(401).json({
+        status: "fail",
+        message: "Your token has expired! Please log in again.",
+      });
+    }
   }
 };

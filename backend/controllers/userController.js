@@ -1,8 +1,10 @@
 const catchAsync = require("../utils/catchAsync");
 const User = require("../models/userModel");
 const jwt = require("jsonwebtoken");
+
 exports.getMe = async (req, res, next) => {
-  const id = jwt.verify(req.cookies.jwt, process.env.JWT_SECRET).id;
+  console.log(req);
+
   try {
     const user = await User.findById(id).select("-password");
     if (!user) {
