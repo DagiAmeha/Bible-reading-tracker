@@ -3,13 +3,12 @@ const catchAsync = require("../utils/catchAsync");
 const User = require("../models/userModel");
 
 const signToken = (userId) => {
-  console.log("###############################3", process.env.JWT_SECRET);
-
   return jwt.sign({ id: userId }, process.env.JWT_SECRET);
 };
 
 const createSendToken = (user, statusCode, res) => {
-  const token = signToken(user._id);
+  const token = signToken(user.id);
+  console.log(token);
 
   const cookieOptions = {
     expires: new Date(
@@ -94,7 +93,6 @@ exports.login = async (req, res) => {
 
 exports.protect = async (req, res, next) => {
   let token;
-  console.log(req.cookies);
   if (
     req.headers.authorization &&
     req.headers.authorization.startsWith("Bearer")
@@ -110,10 +108,9 @@ exports.protect = async (req, res, next) => {
       message: "You are not logged in! Please log in to get access",
     });
   }
-  console.log("###############################3", process.env.JWT_SECRET);
+
   try {
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
-    console.log(decoded);
     const currentUser = await User.findById(decoded.id);
     if (!currentUser) {
       return res.status(401).json({
@@ -121,8 +118,7 @@ exports.protect = async (req, res, next) => {
         message: "The user belonging to this token does no longer exist",
       });
     }
-
-    if (currentUser.changesPasswordAfter(decoded.iat)) {
+    if (await currentUser.changesPasswordAfter(decoded.iat)) {
       return res.status(401).json({
         status: "fail",
         message: "User recently changed password! Please log in again",

@@ -95,6 +95,7 @@ export const AuthForm = ({
       console.log(res);
       if (res.data.status === "success") {
         setUser(res.data.data.user);
+        localStorage.setItem("jwt", res.data.token);
         navigate("/dashboard", { replace: true });
       }
     } catch (err) {
