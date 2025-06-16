@@ -90,7 +90,14 @@ exports.login = async (req, res) => {
     });
   }
 };
-
+exports.logout = (req, res) => {
+  res.clearCookie("jwt", {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === "production",
+    sameSite: "lax",
+  });
+  res.status(200).json({ status: "success", message: "Logged out" });
+};
 exports.protect = async (req, res, next) => {
   let token;
   if (

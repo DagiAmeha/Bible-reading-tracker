@@ -12,6 +12,7 @@ import ProtectedRoute from "./ProtectedRoute";
 const App = () => {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [loginSuccess, setLoginSuccess] = useState(false);
 
   useEffect(() => {
     const token = localStorage.getItem("jwt");
@@ -32,32 +33,43 @@ const App = () => {
           setLoading(false); // <-- And here
         });
     }
+    setLoading(false); // <-- And here
   }, []);
 
   if (loading) {
     return <div>Loading...</div>;
-  } else {
-    return (
-      <>
-        <NavBar user={user} setUser={setUser} />
-        <Routes>
-          <Route path="/" element={<WelcomePage />} />
-          <Route path="/login" element={<SignIn setUser={setUser} />} />
-          <Route path="/signup" element={<SignUp setUser={setUser} />} />
-          <Route
-            path="/dashboard"
-            element={
-              <ProtectedRoute user={user}>
-                <Dashboard />
-              </ProtectedRoute>
-            }
-          />
-          <Route path="/plan/:book/day/:day" element={<PlanDetail />} />
-          {/* <Route path="/admin" element={<AdminPanel />} /> */}
-        </Routes>
-      </>
-    );
   }
+  console.log("App user:", user);
+  return (
+    <>
+      <NavBar user={user} setUser={setUser} />
+      <Routes>
+        <Route path="/" element={<WelcomePage />} />
+        <Route
+          path="/login"
+          element={
+            <SignIn setUser={setUser} setLoginSuccess={setLoginSuccess} />
+          }
+        />
+        <Route
+          path="/signup"
+          element={
+            <SignUp setUser={setUser} setLoginSuccess={setLoginSuccess} />
+          }
+        />
+        <Route
+          path="/dashboard"
+          element={
+            <ProtectedRoute user={user}>
+              <Dashboard loginSuccess={loginSuccess} />
+            </ProtectedRoute>
+          }
+        />
+        <Route path="/plan/:book/day/:day" element={<PlanDetail />} />
+        {/* <Route path="/admin" element={<AdminPanel />} /> */}
+      </Routes>
+    </>
+  );
 };
 
 export default App;

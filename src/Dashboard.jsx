@@ -11,7 +11,7 @@ const books = [
 
 const chaptersPerDay = 2;
 
-const Dashboard = () => {
+const Dashboard = ({ loginSuccess }) => {
   const navigate = useNavigate();
   const [currentBookIndex, setCurrentBookIndex] = useState(0);
 
@@ -43,54 +43,75 @@ const Dashboard = () => {
   };
 
   return (
-    <div className="p-4 min-h-screen bg-gray-100">
-      <div className="flex items-center justify-between mb-4">
-        <button
-          onClick={handlePrev}
-          className="p-2 text-blue-600 hover:text-blue-800"
+    <>
+      {loginSuccess && (
+        <div
+          className={`
+      fixed left-1/2 top-0 z-50
+      -translate-x-1/2
+      transition-all duration-700 ease-out
+      ${
+        loginSuccess ? "translate-y-8 opacity-100" : "-translate-y-20 opacity-0"
+      }
+      bg-green-500 text-white px-6 py-3 rounded-b shadow-lg
+    `}
+          style={{ minWidth: "220px", textAlign: "center" }}
         >
-          <ArrowLeft />
-        </button>
-        <h2 className="text-xl font-bold text-center w-full -ml-10 md:ml-0 md:text-2xl">
-          {currentBook.name}
-        </h2>
-        <button
-          onClick={handleNext}
-          className="p-2 text-blue-600 hover:text-blue-800"
-        >
-          <ArrowRight />
-        </button>
-      </div>
+          Login successful!
+        </div>
+      )}
 
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-        {days.map((dayObj) => {
-          const isUnlocked = dayObj.day <= maxUnlockedDay;
-          const isRead = readDays.includes(dayObj.day);
+      <div className="p-4 min-h-screen bg-gray-100">
+        <div className="flex items-center justify-between mb-4">
+          <button
+            onClick={handlePrev}
+            className="p-2 text-blue-600 hover:text-blue-800"
+          >
+            <ArrowLeft />
+          </button>
+          <h2 className="text-xl font-bold text-center w-full -ml-10 md:ml-0 md:text-2xl">
+            {currentBook.name}
+          </h2>
+          <button
+            onClick={handleNext}
+            className="p-2 text-blue-600 hover:text-blue-800"
+          >
+            <ArrowRight />
+          </button>
+        </div>
 
-          return (
-            <div
-              key={dayObj.day}
-              onClick={() =>
-                isUnlocked && goToDay(currentBook.name, dayObj.day)
-              }
-              className={`relative p-4 rounded shadow transition cursor-${
-                isUnlocked ? "pointer" : "not-allowed"
-              } ${
-                isUnlocked
-                  ? "bg-white hover:shadow-md"
-                  : "bg-gray-200 text-gray-500"
-              }`}
-            >
-              <p className="font-semibold">Day {dayObj.day}</p>
-              <p className="text-sm">Chapters: {dayObj.chapters.join(" - ")}</p>
-              {isRead && (
-                <CheckCircle className="absolute top-2 right-2 text-green-500 w-5 h-5" />
-              )}
-            </div>
-          );
-        })}
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+          {days.map((dayObj) => {
+            const isUnlocked = dayObj.day <= maxUnlockedDay;
+            const isRead = readDays.includes(dayObj.day);
+
+            return (
+              <div
+                key={dayObj.day}
+                onClick={() =>
+                  isUnlocked && goToDay(currentBook.name, dayObj.day)
+                }
+                className={`relative p-4 rounded shadow transition cursor-${
+                  isUnlocked ? "pointer" : "not-allowed"
+                } ${
+                  isUnlocked
+                    ? "bg-white hover:shadow-md"
+                    : "bg-gray-200 text-gray-500"
+                }`}
+              >
+                <p className="font-semibold">Day {dayObj.day}</p>
+                <p className="text-sm">
+                  Chapters: {dayObj.chapters.join(" - ")}
+                </p>
+                {isRead && (
+                  <CheckCircle className="absolute top-2 right-2 text-green-500 w-5 h-5" />
+                )}
+              </div>
+            );
+          })}
+        </div>
       </div>
-    </div>
+    </>
   );
 };
 

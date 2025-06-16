@@ -57,6 +57,7 @@ export const AuthForm = ({
   footerLink,
   footerText,
   setUser,
+  setLoginSuccess,
 }) => {
   const [name, setName] = useState("");
   const [phoneNumber, setPhoneNumber] = useState("");
@@ -96,6 +97,9 @@ export const AuthForm = ({
       if (res.data.status === "success") {
         setUser(res.data.data.user);
         localStorage.setItem("jwt", res.data.token);
+        setLoginSuccess(true);
+        setTimeout(() => setLoginSuccess(false), 3000); // 5 seconds
+
         navigate("/dashboard", { replace: true });
       }
     } catch (err) {
@@ -190,7 +194,7 @@ export const AuthForm = ({
   );
 };
 
-export const SignUp = ({ setUser }) => (
+export const SignUp = ({ setUser, setLoginSuccess }) => (
   <>
     <AuthForm
       title="Create Your Account"
@@ -198,17 +202,19 @@ export const SignUp = ({ setUser }) => (
       footerLink="/login"
       footerText="Already have an account?"
       setUser={setUser}
+      setLoginSuccess={setLoginSuccess}
     />
   </>
 );
 
-export const SignIn = ({ setUser }) => (
+export const SignIn = ({ setUser, setLoginSuccess }) => (
   <AuthForm
     title="Welcome Back"
     actionLabel="Sign In"
     footerLink="/signup"
     footerText="Don't have an account?"
     setUser={setUser}
+    setLoginSuccess={setLoginSuccess}
   />
 );
 
